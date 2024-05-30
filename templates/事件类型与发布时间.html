@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>事件类型与发布时间</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-title {
+            font-size: 20px;
+            text-align: center;
+        }
+        .chart-container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .chart {
+            width: calc(50% - 20px); /* 使图表容器的宽度为页面宽度的一半减去一些间距 */
+            margin-right: 20px; /* 添加间距 */
+            height: 400px; /* 设置固定高度 */
+        }
+        @media (max-width: 768px) {
+            .chart {
+                width: 100%; /* 在较小的屏幕上，使图表占据整个宽度 */
+                margin-right: 0; /* 移除边距 */
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="functions">
+        <div><a href="#" data-url="/" id="home-link">首页</a></div>
+        <div><a href="#" data-url="/关联人物分析" target="_self">关联人物分析</a></div>
+        <div><a href="#" data-url="热门话题分析" target="_self">热门话题分析</a></div>
+        <div><a href="#" data-url="/事件类型与发布时间" target="_self">事件类型与发布时间</a></div>
+        <div><a href="#" data-url="/人物与热度" target="_self">人物与热度</a></div>
+</div>
+<div class="chart-container">
+    <div class="chart">
+        <h2 class="chart-title">事件类型与热度</h2>
+        <canvas id="pieChart"></canvas>
+    </div>
+    <div class="chart">
+        <h2 class="chart-title">发布时间分析</h2>
+        <canvas id="barChart"></canvas>
+    </div>
+</div>
+
+<script>
+    fetch('/pta')
+        .then(response => response.json())
+        .then(data => {
+            const news_counts = data[0]; // 获取新闻计数数据
+            const category_data = data[1]; // 获取类别数据
+
+            // 处理新闻计数数据
+            const dates = Object.keys(news_counts);
+            const counts = Object.values(news_counts);
+
+            // 创建柱状图
+            const barChartCtx = document.getElementById('barChart').getContext('2d');
+            new Chart(barChartCtx, {
+                type: 'bar',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: '事件个数',
+                        data: counts,
+                        backgroundColor: '#36A2EB'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            });
+
+            // 处理类别数据
+            const categories = category_data.map(item => item.Category);
+            const readingNums = category_data.map(item => item['Total Reading Num']);
+
+            // 创建饼状图
+            const pieChartCtx = document.getElementById('pieChart').getContext('2d');
+            new Chart(pieChartCtx, {
+                type: 'pie',
+                data: {
+                    labels: categories,
+                    datasets: [{
+                        label: '热度',
+                        data: readingNums,
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9966', '#66FF99']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        });
+</script>
+</body>
+<html>

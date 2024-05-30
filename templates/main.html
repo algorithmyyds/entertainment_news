@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>娱乐新闻注册登录界面</title>
+    <title>娱乐新闻主界面</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,6 +12,7 @@
             display: flex;
             flex-direction: column;
         }
+
         .navbar {
             display: flex;
             justify-content: space-between;
@@ -19,11 +20,13 @@
             padding: 10px 20px;
             color: white;
         }
+
         .navbar a {
             color: white;
             text-decoration: none;
             padding: 0 10px;
         }
+
         .functions {
             display: flex;
             justify-content: space-around;
@@ -31,28 +34,43 @@
             padding: 10px 0;
             color: white;
         }
+
         .functions div {
             flex: 1;
             text-align: center;
             cursor: pointer;
         }
+
+        .functions div a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .functions div a:visited {
+            color: white;
+        }
+
         .content {
             display: flex;
             padding: 20px;
         }
+
         .carousel {
             flex: 3;
             margin-right: 20px;
             position: relative;
         }
+
         .carousel img {
             width: 100%;
             height: auto;
             display: none;
         }
+
         .carousel img.active {
             display: block;
         }
+
         .carousel-controls {
             position: absolute;
             top: 50%;
@@ -61,6 +79,7 @@
             justify-content: space-between;
             transform: translateY(-50%);
         }
+
         .carousel-controls button {
             background-color: rgba(0, 0, 0, 0.5);
             border: none;
@@ -68,6 +87,7 @@
             padding: 10px;
             cursor: pointer;
         }
+
         .carousel-indicators {
             position: absolute;
             bottom: 10px;
@@ -76,6 +96,7 @@
             display: flex;
             justify-content: center;
         }
+
         .carousel-indicators span {
             display: inline-block;
             width: 10px;
@@ -85,53 +106,137 @@
             border-radius: 50%;
             cursor: pointer;
         }
+
         .carousel-indicators .active {
             background-color: white;
         }
+
         .news {
             flex: 2;
         }
+
         .news ul {
             list-style: none;
             padding: 0;
         }
+
         .news li {
             margin-bottom: 10px;
             padding: 10px;
             border-bottom: 1px solid #ddd;
         }
-        .functions div a {
-            color: white; /* 设置文本颜色为白色 */
-            text-decoration: none; /* 去掉下划线 */
+
+        .news li span {
+            display: block;
+            margin-bottom: 5px;
         }
-        .functions div a:visited {
-            color: white; /* 点击后保持白色 */
+
+        .news li a {
+            color: blue;
+            text-decoration: none;
         }
+
+        .news li span.hot {
+            color: red;
+            margin-left: 5px;
+        }
+
+        .carousel-caption {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 5px;
+            width: 20%; /* 占图片的五分之一 */
+            text-align: center;
+            box-sizing: border-box;
+            color: white;
+            font-size: 1.4em; /* 字可以大一点 */
+            white-space: nowrap; /* 不换行 */
+            overflow: hidden;
+            text-overflow: ellipsis; /* 文字超出部分用省略号显示 */
+        }
+
     </style>
 </head>
 <body>
 <div class="navbar">
-    <a href="main.html" id="home-link">首页</a>
     <span id="login-status"></span>
-    <a href="#" id="login-register-link" >登录/注册</a>
-    
+    <a href="#" id="login-register-link">登录/注册</a>
 </div>
-<div class="functions">
-    <div><a href="/关联人物分析" target="_blank">关联人物分析</a></div>
-    <div><a href="/热门事件分析" target="_blank">热门事件分析</a></div>
-    <div><a href="/热门话题分析" target="_blank">热门话题分析</a></div>
-    <div><a href="/发布时间分析" target="_blank">发布时间分析</a></div>
-    <div><a href="/人物与热度" target="_blank">人物与热度</a></div>
-    <div><a href="/事件类型与热度" target="_blank">事件类型与热度</a></div>
-</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 初始化登录状态为 false
+        if (!localStorage.getItem('isLoggedIn')) {
+            localStorage.setItem('isLoggedIn', 'false');
+        }
 
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+        const loginStatus = document.getElementById('login-status');
+        const loginRegisterLink = document.getElementById('login-register-link');
+
+        // 检查登录状态
+        if (isLoggedIn === 'true') {
+            loginRegisterLink.innerText = '已登录';
+        } else {
+        }
+        // 拦截登录/注册链接的点击事件
+        loginRegisterLink.addEventListener('click', function(event) {
+            event.preventDefault(); // 阻止默认行为
+            window.location.href = '/nlogin';
+        });
+
+
+        // 给分析功能链接添加点击事件监听器
+        const analysisLinks = document.querySelectorAll('.functions a');
+        analysisLinks.forEach(link => {
+            link.addEventListener('click', function(event) {
+                if (isLoggedIn !== 'true') {
+                    event.preventDefault(); // 阻止默认行为
+                    const loginConfirm = confirm('使用该功能必须登录，是否登录？');
+                    if (loginConfirm) {
+                        window.location.href = '/nlogin'; // 跳转到登录页面
+                    }
+                }else {
+                    // 用户已登录，跳转到对应的后端接口页面
+                    event.preventDefault(); // 阻止默认行为
+                    window.open(this.getAttribute('data-url'), '_blank');
+
+                }
+            });
+        });
+    });
+</script>
+<div class="functions">
+    <div><a href="#" data-url="/" id="home-link">首页</a></div>
+    <div><a href="#" data-url="/关联人物分析" target="_self">关联人物分析</a></div>
+    <div><a href="#" data-url="热门话题分析" target="_self">热门话题分析</a></div>
+    <div><a href="#" data-url="/事件类型与发布时间" target="_self">事件类型与发布时间</a></div>
+    <div><a href="#" data-url="/人物与热度" target="_self">人物与热度</a></div>
+</div>
 <div class="content">
     <div class="carousel">
-        <img src="" alt="" class="active">
-        <img src="" alt="">
-        <img src="" alt="">
-        <img src="" alt="">
-        <img src="" alt="">
+        <a href="#" target="_blank">
+            <img src="" alt="" class="active">
+            <div class="carousel-caption"></div>
+        </a>
+        <a href="#" target="_blank">
+            <img src="" alt="">
+            <div class="carousel-caption"></div>
+        </a>
+        <a href="#" target="_blank">
+            <img src="" alt="">
+            <div class="carousel-caption"></div>
+        </a>
+        <a href="#" target="_blank">
+            <img src="" alt="">
+            <div class="carousel-caption"></div>
+        </a>
+        <a href="#" target="_blank">
+            <img src="" alt="">
+            <div class="carousel-caption"></div>
+        </a>
         <div class="carousel-controls">
             <button onclick="prevSlide()">&#10094;</button>
             <button onclick="nextSlide()">&#10095;</button>
@@ -151,135 +256,107 @@
         </ul>
     </div>
 </div>
-
-<!--登录状态动态处理-->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // 初始化登录状态为 false
-        if (!localStorage.getItem('isLoggedIn')) {
-            localStorage.setItem('isLoggedIn', 'false');
-        }
+        async function fetchNews() {
+            let slicedNewsData;
+            try {
+                const response = await fetch('/heat_news'); // 发送 GET 请求到后端API
+                const newsData = await response.json();
 
-        const isLoggedIn = localStorage.getItem('isLoggedIn');
-        const loginStatus = document.getElementById('login-status');
-        const loginRegisterLink = document.getElementById('login-register-link');
+                const newsList = document.getElementById('news-list');
+                newsList.innerHTML = ''; // 清空现有的新闻列表
+                newsData.forEach((news, index) => {
+                    const newsItem = document.createElement('li');
+                    const newsLink = document.createElement('a');
+                    newsLink.href = news.url;
+                    newsLink.target = '_blank';
+                    const newsTitle = document.createElement('span');
+                    newsTitle.textContent = `${index + 1}. ${news.title}`;
+                    newsLink.appendChild(newsTitle);
 
-        // 检查登录状态
-        if (isLoggedIn === 'true') {
-        
-            loginRegisterLink.innerText = '已登录';
-        } else {
-            
-        }
-
-        // 拦截登录/注册链接的点击事件
-          loginRegisterLink.addEventListener('click', function(event) {
-    event.preventDefault(); // 阻止默认行为
-    window.location.href = '/nlogin';
-});
-
-
-        // 给分析功能链接添加点击事件监听器
-        const analysisLinks = document.querySelectorAll('.functions a');
-        analysisLinks.forEach(link => {
-            link.addEventListener('click', function(event) {
-                if (isLoggedIn !== 'true') {
-                    event.preventDefault(); // 阻止默认行为
-                    const loginConfirm = confirm('使用该功能必须登录，是否登录？');
-                    if (loginConfirm) {
-                        window.location.href = '/nlogin'; // 跳转到登录页面
+                    if (index < 3) {
+                        const hotLabel = document.createElement('span');
+                        hotLabel.className = 'hot';
+                        hotLabel.textContent = '热';
+                        hotLabel.style.color = 'red';
+                        newsTitle.appendChild(hotLabel);
                     }
-                }
-            });
-        });
-    });
-</script>
 
-<!--动态轮播前五娱乐新闻-->
-<script>
-     document.addEventListener('DOMContentLoaded', function(){
-    let currentSlide = 0;
-    const slides = document.querySelectorAll('.carousel img');
-    const indicators = document.querySelectorAll('.carousel-indicators span');
-    const totalSlides = slides.length;
+                    newsItem.appendChild(newsLink);
+                    newsList.appendChild(newsItem);
+                });
+
+                const carouselImages = document.querySelectorAll('.carousel img');
+                const carouselLinks = document.querySelectorAll('.carousel a');
+                const carouselCaptions = document.querySelectorAll('.carousel-caption');
+                const carouselIndicators = document.querySelectorAll('.carousel-indicators span');
+                slicedNewsData = newsData.slice(0, 5);
+
+                slicedNewsData.forEach((news, index) => {
+                    const imageUrl = news.cover;
+                    const altText = news.title;
+                    const newsUrl = news.url;
+
+                    carouselImages[index].src = imageUrl;
+                    carouselImages[index].alt = altText;
+                    carouselLinks[index].href = newsUrl;
+                    carouselCaptions[index].innerHTML = altText;
+
+                    carouselIndicators[index].addEventListener('click', function() {
+                        showSlide(index);
+                    });
+                });
+
+                showSlide(0);
+
+            } catch (error) {
+                console.error('获取新闻数据失败:', error);
+            }
+        }
+
+        fetchNews();
+    });
 
     function showSlide(index) {
-        slides[currentSlide].classList.remove('active');
-        indicators[currentSlide].classList.remove('active');
-        currentSlide = (index + totalSlides) % totalSlides;
-        slides[currentSlide].classList.add('active');
-        indicators[currentSlide].classList.add('active');
+        const slides = document.querySelectorAll('.carousel img');
+        const indicators = document.querySelectorAll('.carousel-indicators span');
+        const captions = document.querySelectorAll('.carousel-caption');
+        const totalSlides = slides.length;
+
+        slides.forEach((slide, i) => {
+            slide.classList.remove('active');
+            indicators[i].classList.remove('active');
+            captions[i].classList.remove('active');
+        });
+
+        slides[index].classList.add('active');
+        indicators[index].classList.add('active');
+        captions[index].classList.add('active');
     }
 
     function nextSlide() {
-        showSlide(currentSlide + 1);
+        const slides = document.querySelectorAll('.carousel img');
+        const currentSlide = Array.from(slides).findIndex(slide => slide.classList.contains('active'));
+        showSlide((currentSlide + 1) % slides.length);
     }
+
     function prevSlide() {
-        showSlide(currentSlide - 1);
+        const slides = document.querySelectorAll('.carousel img');
+        const currentSlide = Array.from(slides).findIndex(slide => slide.classList.contains('active'));
+        showSlide((currentSlide - 1 + slides.length) % slides.length);
     }
 
-    setInterval(nextSlide, 5000); // 自动轮播间隔时间（毫秒）
+    document.addEventListener('DOMContentLoaded', function(){
+        let autoSlideInterval = setInterval(nextSlide, 5000);
 
-    document.querySelectorAll('.carousel-controls button').forEach(button => {
-        button.addEventListener('click', () => {
-            clearInterval(autoSlideInterval);
-            autoSlideInterval = setInterval(nextSlide, 5000);
-        });
-    });
-
-    let autoSlideInterval = setInterval(nextSlide, 5000); // 自动轮播间隔时间（毫秒）
-    });
-</script>
-
-<!--今日娱乐新闻-->
-<script>
-     document.addEventListener('DOMContentLoaded', function(){
-    async function fetchNews() {
-     let slicedNewsData; // 将 slicedNewsData 定义在 try 块之外
-        try {
-            const response = await fetch('/heat_news'); // 发送 GET 请求到后端API
-            const newsData = await response.json();
-
-            const newsList = document.getElementById('news-list');
-            newsList.innerHTML = ''; // 清空现有的新闻列表
-            newsData.forEach(news => {
-                const newsItem = document.createElement('li');
-                const newsLink = document.createElement('a');
-                newsLink.href = news.url;
-                newsLink.textContent = news.title;
-                newsItem.appendChild(newsLink);
-                newsList.appendChild(newsItem);
-            });
-            const carouselImages = document.querySelectorAll('.carousel img');
-           const carouselIndicators = document.querySelectorAll('.carousel-indicators span');
-                // 获取前5个新闻数据
-        slicedNewsData = newsData.slice(0, 5);
-            // 遍历获取到的新闻数据
-        slicedNewsData.forEach((news, index) => {
-            // 获取新闻图片链接和替代文字
-            const imageUrl = news.cover;
-            const altText = news.title;
-
-            // 更新轮播图片的src属性和替代文字
-            carouselImages[index].src = imageUrl;
-            carouselImages[index].alt = altText;
-
-            // 更新轮播指示器的点击事件
-            carouselIndicators[index].addEventListener('click', function() {
-                showSlide(index);
+        document.querySelectorAll('.carousel-controls button').forEach(button => {
+            button.addEventListener('click', () => {
+                clearInterval(autoSlideInterval);
+                autoSlideInterval = setInterval(nextSlide, 5000);
             });
         });
-        // 显示第一张轮播图片
-        showSlide(0);
-
-        } catch (error) {
-            console.error('获取新闻数据失败:', error);
-        }
-    }
-
-    fetchNews(); // 页面加载时获取新闻数据
-});
+    });
 </script>
-
 </body>
 </html>

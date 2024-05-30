@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 app = Flask(__name__)
 
+
 #MySQL配置
 def get_db_connection():
     conn = mysql.connector.connect(
@@ -26,6 +27,24 @@ def get_db_connection():
 
 db_connection = get_db_connection()
 cur = db_connection.cursor()
+query = """SELECT b.related_people, SUM(h.reading_num) AS total_reading_num
+                 FROM basic_info AS b
+                 JOIN hot_time AS h ON b.title = h.title
+                 WHERE b.related_people IS NOT NULL AND b.related_people != ''
+                 GROUP BY b.related_people"""
+cur.execute(query)
+result = cur.fetchall()
+
+# 构建人名和阅读数的字典
+people_dict = defaultdict(int)
+for item in result:
+    related_people = item[0].split(',')  # 拆分多个人名
+    reading_num = item[1]
+    for person in related_people:
+        people_dict[person.strip()] += reading_num  # 去除空格并累加阅读数
+
+# 获取前二十名人名及其对应的阅读数
+sorted_people = sorted(people_dict.items(), key=lambda x: x[1], reverse=True)
 def get_related_people(query_person):
     # Create a cursor object
 
@@ -123,6 +142,13 @@ def nlogin():
 @app.route('/热门话题分析', methods=['GET'])
 def hot_subject_page():
     return render_template('热门话题分析.html')
+@app.route('/人物与热度', methods=['GET'])
+def hot_person_page():
+    return render_template('人物与热度.html')
+
+@app.route('/事件类型与发布时间', methods=['GET'])
+def hot_event_page():
+    return render_template('事件类型与发布时间.html')
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -162,27 +188,8 @@ def login():
 #     return
 @app.route('/search',methods =['Get'])
 def search_by_prefix():
-
     prefix = request.args.get('keyword',default=None,type=str)
     global cur
-    query = """SELECT b.related_people, SUM(h.reading_num) AS total_reading_num
-                  FROM basic_info AS b
-                  JOIN hot_time AS h ON b.title = h.title
-                  WHERE b.related_people IS NOT NULL AND b.related_people != ''
-                  GROUP BY b.related_people"""
-    cur.execute(query)
-    result = cur.fetchall()
-
-    # 构建人名和阅读数的字典
-    people_dict = defaultdict(int)
-    for item in result:
-        related_people = item[0].split(',')  # 拆分多个人名
-        reading_num = item[1]
-        for person in related_people:
-            people_dict[person.strip()] += reading_num  # 去除空格并累加阅读数
-
-    # 获取前二十名人名及其对应的阅读数
-    sorted_people = sorted(people_dict.items(), key=lambda x: x[1], reverse=True)
     known_names=[item[0]  for item in sorted_people]
     # 使用列表推导式来过滤出所有以prefix为前缀的元素
     prefixed= [s for s in known_names if s.startswith(prefix)]
@@ -285,6 +292,75 @@ def generate_wordcloud():
     plt.imshow(wordcloud, interpolation='bilinear')
     plt.axis('off')
     plt.savefig(filename)
+
+
+# 人物与热度数据查询
+@app.route('/pah', methods=['GET'])
+def pah():
+    global cur
+    query = """SELECT b.related_people, SUM(h.reading_num) AS total_reading_num
+               FROM basic_info AS b
+               JOIN hot_time AS h ON b.title = h.title
+               WHERE b.related_people IS NOT NULL AND b.related_people != ''
+               GROUP BY b.related_people"""
+    cur.execute(query)
+    result = cur.fetchall()
+
+    # 构建人名和阅读数的字典
+    people_dict = defaultdict(int)
+    for item in result:
+        related_people = item[0].split(',')  # 拆分多个人名
+        reading_num = item[1]
+        for person in related_people:
+            people_dict[person.strip()] += reading_num  # 去除空格并累加阅读数
+
+    # 获取前十名人名及其对应的阅读数
+    sorted_people = sorted(people_dict.items(), key=lambda x: x[1], reverse=True)[:10]
+    # 构建查询结果
+    people_data = [{"Related People": person, "Reading Num": num} for person, num in sorted_people]
+
+    # 返回结果给前端
+    return jsonify(people_data)
+
+
+
+@app.route('/pta', methods=['GET'])
+def pta():
+    global cur
+    # 执行查询语句
+    # 返回子查询作临时表，分组并排序
+    query1 = """
+       SELECT date, COUNT(*) AS count
+       FROM (
+        SELECT DATE(publication_time) AS date
+        FROM basic_info
+        WHERE DATE(publication_time) >= (SELECT MAX(DATE(publication_time)) - INTERVAL 6 DAY FROM basic_info)
+       ) AS subquery
+       GROUP BY date
+       ORDER BY date DESC
+    """
+    cur.execute(query1)
+    results1 = cur.fetchall()
+
+    query2 = """SELECT b.category, SUM(h.reading_num) AS total_reading_num
+                FROM basic_info AS b
+                JOIN hot_time AS h ON b.title = h.title
+                GROUP BY b.category"""
+    cur.execute(query2)
+    results2 = cur.fetchall()
+
+    # 处理查询结果
+    news_counts = defaultdict(int)
+    for date, count in results1:
+        # 提取日期部分
+        date = date.strftime('%Y-%m-%d')
+        # 统计每个日期对应的数据个数
+        news_counts[date] = count
+
+    category_data = [{"Category": item[0], "Total Reading Num": item[1]} for item in results2]
+
+    # 返回结果给前端
+    return jsonify(news_counts, category_data)
 
 
 if __name__ == '__main__':

@@ -32,7 +32,7 @@
         }
 
         button:hover {
-            background-color: #45a049;
+            background-color: #1da924;
         }
 
         #image-container {
@@ -40,13 +40,47 @@
             justify-content: center;
         }
 
+
         h1 {
             text-align: center;
+        }
+
+        .functions {
+            display: flex;
+            justify-content: space-around;
+            background-color: #444;
+            padding: 10px 0;
+            color: white;
+        }
+
+        .functions div {
+            flex: 1;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .functions div a {
+            color: white;
+            /* 设置文本颜色为白色 */
+            text-decoration: none;
+            /* 去掉下划线 */
+        }
+
+        .functions div a:visited {
+            color: white;
+            /* 点击后保持白色 */
         }
     </style>
 </head>
 
 <body>
+    <div class="functions">
+        <div><a href="/" target="_blank">首页</a></div>
+        <div><a href="/关联人物分析" target="_self">关联人物分析</a></div>
+        <div><a href="/热门话题分析" target="_self">热门话题分析</a></div>
+        <div><a href="/事件类型与发布时间" target="_self">事件类型与发布时间</a></div>
+        <div><a href="/人物与热度" target="_self">人物与热度</a></div>
+    </div>
     <h1>热门娱乐新闻分析</h1>
     <form id="date-range-form">
         <button type="submit">生成词云图</button>
@@ -54,10 +88,7 @@
     <div id="image-container">
         <img id="wordcloud-image" src="" alt="词云图" style="display: none;">
     </div>
-    <!-- <div id="wordcloud"></div> -->
 
-    <!-- <script src="echarts.min.js"></script>
-    <script src="wordcloud2.min.js"></script> -->
     <script>
         // 添加事件监听器，当表单提交时触发
         document.getElementById('date-range-form').addEventListener('submit', function (event) {
