@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login/Register</title>
+</head>
+<body>
+    <a id="loginRegisterLink" href="#">Login/Register</a>
+
+    <script>
+        const loginRegisterLink = document.getElementById('loginRegisterLink');
+
+        loginRegisterLink.addEventListener('click', function(event) {
+            event.preventDefault(); // 阻止默认行为
+            fetch('/nlogin', {
+                method: 'GET'
+            })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url; // 跳转到登录页面
+                }
+            })
+            .catch(error => {
+                console.error('GET请求失败:', error);
+                // 可以在这里处理错误，例如显示提示信息
+            });
+        });
+    </script>
+</body>
+</html>

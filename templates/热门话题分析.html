@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>热门娱乐新闻分析</title>
+    <style>
+        /* 省略样式部分 */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        form {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #image-container {
+            display: flex;
+            justify-content: center;
+        }
+
+        h1 {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>热门娱乐新闻分析</h1>
+    <form id="date-range-form">
+        <button type="submit">生成词云图</button>
+    </form>
+    <div id="image-container">
+        <img id="wordcloud-image" src="" alt="词云图" style="display: none;">
+    </div>
+    <!-- <div id="wordcloud"></div> -->
+
+    <!-- <script src="echarts.min.js"></script>
+    <script src="wordcloud2.min.js"></script> -->
+    <script>
+        // 添加事件监听器，当表单提交时触发
+        document.getElementById('date-range-form').addEventListener('submit', function (event) {
+            event.preventDefault(); // 阻止表单默认提交行为
+            const currentDate = new Date();
+            const year = currentDate.getFullYear();
+            const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // 月份从0开始，所以要+1
+            const day = String(currentDate.getDate()).padStart(2, '0'); // 如果日期小于10，前面补0
+
+            //wordclouds/2024-05-29.jpg
+            // 构建日期字符串
+            const formattedDate = `static/${year}-${month}-${day}.jpg`;
+
+            // 设定要加载的图片路径
+
+            const imageUrl = formattedDate;
+
+            // 获取图片元素并设置 src 属性
+            imgElement = document.getElementById('wordcloud-image');
+
+            imgElement.src = imageUrl;
+            imgElement.style.display = 'block';
+        });
+    </script>
+</body>
+
+</html>

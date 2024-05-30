@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自动匹配</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-weight: 500;
+            font-family: "Microsoft YaHei", "宋体", "Segoe UI", "Lucida Grande", Helvetica, Arial, sans-serif, FreeSans, Arimo;
+        }
+
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            top: 0;
+            left: 0;
+        }
+
+        .container {
+            width: 800px;
+            margin: 50px auto;
+            position: relative;
+        }
+
+        h1,
+        h2 {
+            text-align: center;
+            color: #0d0101;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        #searchInput {
+            flex-grow: 1;
+            height: 42px;
+            padding-left: 13px;
+            border: 2px solid #7BA7AB;
+            border-radius: 5px 0 0 5px;
+            background: #F9F0DA;
+            color: #9E9C9C;
+            font-size: 16px;
+            outline: none;
+        }
+
+        #searchButton {
+            height: 42px;
+            padding: 0 20px;
+            background: #7BA7AB;
+            color: #fff;
+            border: 2px solid #7BA7AB;
+            border-radius: 0 5px 5px 0;
+            font-size: 16px;
+            cursor: pointer;
+            outline: none;
+        }
+
+        #searchContent {
+            background: #fff;
+            border-radius: 5px;
+            padding: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #searchSuggestions {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #relatedPeopleList,
+        #newsList {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .newsItem {
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            color: #494A5F;
+            display: flex;
+            align-items: center;
+        }
+
+        .personItem {
+            font-family: "Segoe UI", Roboto, Arial, sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            line-height: 1.5;
+            margin-bottom: 10px;
+            color: #040404;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            display: flex; /* 使用 flex 布局 */
+            justify-content: center;
+            padding: 10px;
+            /* 水平居中 */
+        }
+
+        .personItem:hover {
+            background-color: #e0e0e0;
+            /* 鼠标悬停时改变背景色 */
+        }
+
+        .newsItem img {
+            max-width: 100px;
+            max-height: 100px;
+            margin-right: 20px;
+            border-radius: 5px;
+        }
+
+        .newsItem:hover,
+        .personItem:hover {
+            background-color: #e0e0e0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="particles-js"></div>
+
+    <div class="container">
+        <h1>人物相关新闻</h1>
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="输入关键词进行搜索">
+            <button id="searchButton">搜索</button>
+        </div>
+        <!-- 添加搜索建议列表 -->
+        <div id="searchContent">
+            <ul id="searchSuggestions"></ul>
+        </div>
+        <!-- 显示关联人物 -->
+        <h2>关联人物列表</h2>
+        <ul id="relatedPeopleList"></ul>
+        <!-- 显示新闻列表 -->
+        <h2>新闻列表</h2>
+        <div id="newsList"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        // 获取相关元素
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const searchSuggestions = document.getElementById('searchSuggestions');
+        const newsList = document.getElementById('newsList');
+        const relatedPeopleList = document.getElementById('relatedPeopleList');
+
+        // 为搜索输入框添加输入事件监听器，实现实时搜索建议
+        searchInput.addEventListener('input', function () {
+            const keyword = searchInput.value.trim();
+            if (keyword.length === 0) {
+                searchSuggestions.innerHTML = '';
+                newsList.innerHTML = '';
+                return;
+            }
+
+            // 向后端发送搜索建议请求
+            fetch(`/search?keyword=${encodeURIComponent(keyword)}`)
+                .then(response => response.json())
+                .then(results => {
+                    displaySearchSuggestions(results);
+                })
+                .catch(error => {
+                    console.error('Error fetching search suggestions:', error);
+                });
+        });
+
+
+        // 为搜索按钮添加点击事件监听器
+        searchButton.addEventListener('click', function () {
+            const keyword = searchInput.value.trim();
+            if (keyword.length === 0) {
+                searchSuggestions.innerHTML = '';
+                newsList.innerHTML = '';
+                relatedPeopleList.innerHTML = '';
+                return;
+            }
+
+            // 向后端发送搜索请求获取新闻列表
+            fetch(`/search_by_name?star_name=${encodeURIComponent(keyword)}`)
+                .then(response => response.json())
+                .then(results => {
+                    const news = results.related_news;
+                    const relatedPeople = results.related_people;
+                    displayNewsList(news);
+                    displayRelatedPeople(relatedPeople);
+                })
+                .catch(error => {
+                    console.error('Error fetching search results:', error);
+                });
+            });
+
+
+
+        // 显示搜索建议列表
+function displaySearchSuggestions(results) {
+    searchSuggestions.innerHTML = ''; // 清空当前搜索建议列表
+    results.forEach(result => {
+        const listItem = document.createElement('li'); // 创建一个新的列表项元素
+        listItem.textContent = result; // 设置列表项的文本内容为搜索建议结果
+        listItem.classList.add('suggestionItem'); // 为列表项添加 CSS 类
+        listItem.addEventListener('click', function () {
+            // 将点击的建议内容填充到搜索框中
+            searchInput.value = result;
+
+            // 自动触发搜索按钮的点击事件
+            searchButton.click();
+        });
+
+        searchSuggestions.appendChild(listItem); // 将列表项添加到搜索建议列表中
+    });
+}
+
+
+        // 显示新闻列表
+        function displayNewsList(news) {
+            newsList.innerHTML = '';
+            searchSuggestions.innerHTML = '';
+            news.forEach(item => {
+                const newsItem = document.createElement('div');
+                newsItem.classList.add('newsItem');
+                newsItem.innerHTML = `
+                    <img src="${item.cover}" alt="${item.title}">
+                    <div>
+                        <h3>${item.title}</h3>
+                    </div>
+                `;
+                // 添加点击事件监听器，点击跳转到新闻链接
+                newsItem.addEventListener('click', function () {
+                    window.open(item.url, '_blank');
+                });
+                newsList.appendChild(newsItem);
+            });
+        }
+
+        // 显示关联人物列表
+        function displayRelatedPeople(people) {
+            relatedPeopleList.innerHTML = '';
+            people.forEach(person => {
+                const personItem = document.createElement('li');
+                personItem.classList.add('personItem');
+                personItem.textContent = person;
+                // 添加点击事件监听器，点击触发搜索
+                // personItem.addEventListener('click', function () {
+                //     searchInput.value = person;
+                //     searchButton.click();
+                // });
+                relatedPeopleList.appendChild(personItem);
+            });
+        }
+    </script>
+</body>
+</html>

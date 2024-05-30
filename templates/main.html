@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>娱乐新闻注册登录界面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            background-color: #333;
+            padding: 10px 20px;
+            color: white;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 0 10px;
+        }
+        .functions {
+            display: flex;
+            justify-content: space-around;
+            background-color: #444;
+            padding: 10px 0;
+            color: white;
+        }
+        .functions div {
+            flex: 1;
+            text-align: center;
+            cursor: pointer;
+        }
+        .content {
+            display: flex;
+            padding: 20px;
+        }
+        .carousel {
+            flex: 3;
+            margin-right: 20px;
+            position: relative;
+        }
+        .carousel img {
+            width: 100%;
+            height: auto;
+            display: none;
+        }
+        .carousel img.active {
+            display: block;
+        }
+        .carousel-controls {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            transform: translateY(-50%);
+        }
+        .carousel-controls button {
+            background-color: rgba(0, 0, 0, 0.5);
+            border: none;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+        }
+        .carousel-indicators {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: center;
+        }
+        .carousel-indicators span {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            margin: 0 5px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .carousel-indicators .active {
+            background-color: white;
+        }
+        .news {
+            flex: 2;
+        }
+        .news ul {
+            list-style: none;
+            padding: 0;
+        }
+        .news li {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .functions div a {
+            color: white; /* 设置文本颜色为白色 */
+            text-decoration: none; /* 去掉下划线 */
+        }
+        .functions div a:visited {
+            color: white; /* 点击后保持白色 */
+        }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <a href="main.html" id="home-link">首页</a>
+    <span id="login-status"></span>
+    <a href="#" id="login-register-link" >登录/注册</a>
+    
+</div>
+<div class="functions">
+    <div><a href="/关联人物分析" target="_blank">关联人物分析</a></div>
+    <div><a href="/热门事件分析" target="_blank">热门事件分析</a></div>
+    <div><a href="/热门话题分析" target="_blank">热门话题分析</a></div>
+    <div><a href="/发布时间分析" target="_blank">发布时间分析</a></div>
+    <div><a href="/人物与热度" target="_blank">人物与热度</a></div>
+    <div><a href="/事件类型与热度" target="_blank">事件类型与热度</a></div>
+</div>
+
+<div class="content">
+    <div class="carousel">
+        <img src="" alt="" class="active">
+        <img src="" alt="">
+        <img src="" alt="">
+        <img src="" alt="">
+        <img src="" alt="">
+        <div class="carousel-controls">
+            <button onclick="prevSlide()">&#10094;</button>
+            <button onclick="nextSlide()">&#10095;</button>
+        </div>
+        <div class="carousel-indicators">
+            <span onclick="showSlide(0)" class="active"></span>
+            <span onclick="showSlide(1)"></span>
+            <span onclick="showSlide(2)"></span>
+            <span onclick="showSlide(3)"></span>
+            <span onclick="showSlide(4)"></span>
+        </div>
+    </div>
+    <div class="news">
+        <h2>今日娱乐新闻 Top 10</h2>
+        <ul id="news-list">
+            <!-- 新闻列表将动态生成 -->
+        </ul>
+    </div>
+</div>
+
+<!--登录状态动态处理-->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 初始化登录状态为 false
+        if (!localStorage.getItem('isLoggedIn')) {
+            localStorage.setItem('isLoggedIn', 'false');
+        }
+
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+        const loginStatus = document.getElementById('login-status');
+        const loginRegisterLink = document.getElementById('login-register-link');
+
+        // 检查登录状态
+        if (isLoggedIn === 'true') {
+        
+            loginRegisterLink.innerText = '已登录';
+        } else {
+            
+        }
+
+        // 拦截登录/注册链接的点击事件
+          loginRegisterLink.addEventListener('click', function(event) {
+    event.preventDefault(); // 阻止默认行为
+    window.location.href = '/nlogin';
+});
+
+
+        // 给分析功能链接添加点击事件监听器
+        const analysisLinks = document.querySelectorAll('.functions a');
+        analysisLinks.forEach(link => {
+            link.addEventListener('click', function(event) {
+                if (isLoggedIn !== 'true') {
+                    event.preventDefault(); // 阻止默认行为
+                    const loginConfirm = confirm('使用该功能必须登录，是否登录？');
+                    if (loginConfirm) {
+                        window.location.href = '/nlogin'; // 跳转到登录页面
+                    }
+                }
+            });
+        });
+    });
+</script>
+
+<!--动态轮播前五娱乐新闻-->
+<script>
+     document.addEventListener('DOMContentLoaded', function(){
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.carousel img');
+    const indicators = document.querySelectorAll('.carousel-indicators span');
+    const totalSlides = slides.length;
+
+    function showSlide(index) {
+        slides[currentSlide].classList.remove('active');
+        indicators[currentSlide].classList.remove('active');
+        currentSlide = (index + totalSlides) % totalSlides;
+        slides[currentSlide].classList.add('active');
+        indicators[currentSlide].classList.add('active');
+    }
+
+    function nextSlide() {
+        showSlide(currentSlide + 1);
+    }
+    function prevSlide() {
+        showSlide(currentSlide - 1);
+    }
+
+    setInterval(nextSlide, 5000); // 自动轮播间隔时间（毫秒）
+
+    document.querySelectorAll('.carousel-controls button').forEach(button => {
+        button.addEventListener('click', () => {
+            clearInterval(autoSlideInterval);
+            autoSlideInterval = setInterval(nextSlide, 5000);
+        });
+    });
+
+    let autoSlideInterval = setInterval(nextSlide, 5000); // 自动轮播间隔时间（毫秒）
+    });
+</script>
+
+<!--今日娱乐新闻-->
+<script>
+     document.addEventListener('DOMContentLoaded', function(){
+    async function fetchNews() {
+     let slicedNewsData; // 将 slicedNewsData 定义在 try 块之外
+        try {
+            const response = await fetch('/heat_news'); // 发送 GET 请求到后端API
+            const newsData = await response.json();
+
+            const newsList = document.getElementById('news-list');
+            newsList.innerHTML = ''; // 清空现有的新闻列表
+            newsData.forEach(news => {
+                const newsItem = document.createElement('li');
+                const newsLink = document.createElement('a');
+                newsLink.href = news.url;
+                newsLink.textContent = news.title;
+                newsItem.appendChild(newsLink);
+                newsList.appendChild(newsItem);
+            });
+            const carouselImages = document.querySelectorAll('.carousel img');
+           const carouselIndicators = document.querySelectorAll('.carousel-indicators span');
+                // 获取前5个新闻数据
+        slicedNewsData = newsData.slice(0, 5);
+            // 遍历获取到的新闻数据
+        slicedNewsData.forEach((news, index) => {
+            // 获取新闻图片链接和替代文字
+            const imageUrl = news.cover;
+            const altText = news.title;
+
+            // 更新轮播图片的src属性和替代文字
+            carouselImages[index].src = imageUrl;
+            carouselImages[index].alt = altText;
+
+            // 更新轮播指示器的点击事件
+            carouselIndicators[index].addEventListener('click', function() {
+                showSlide(index);
+            });
+        });
+        // 显示第一张轮播图片
+        showSlide(0);
+
+        } catch (error) {
+            console.error('获取新闻数据失败:', error);
+        }
+    }
+
+    fetchNews(); // 页面加载时获取新闻数据
+});
+</script>
+
+</body>
+</html>
